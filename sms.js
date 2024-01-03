@@ -22,7 +22,7 @@ class Student {
         this.name = name;
     }
     generateStudentID() {
-        const uniqueID = (Math.random() * 100000).toFixed(0).padStart(5, '0');
+        const uniqueID = (Math.floor(Math.random() * 90000) + 10000).toString();
         return `S${uniqueID}`;
     }
     enroll(course) {
@@ -62,18 +62,35 @@ class Student {
     }
 }
 class StudentManagementSystem {
+    courses = [
+        new Course('GD101', 'Graphic Designing'),
+        new Course('WD102', 'Web Development'),
+        new Course('PP103', 'Python Programming'),
+        new Course('FL104', 'Freelancing'),
+        new Course('DM105', 'Digital Marketing'),
+    ];
     students = [];
     async addStudentInteractive() {
         const answers = await inquirer.prompt([
             { type: 'input', name: 'name', message: 'Enter student name:' },
-            { type: 'input', name: 'courseCode', message: 'Enter course code:' },
-            { type: 'input', name: 'courseName', message: 'Enter course name:' },
+            {
+                type: 'list',
+                name: 'courseIndex',
+                message: 'Choose a course to enroll:',
+                choices: this.courses.map((course, index) => `${index + 1}. ${course.getCourseInfo()}`),
+            },
         ]);
-        const course = new Course(answers.courseCode, answers.courseName);
-        const student = new Student(answers.name);
-        student.enroll(course);
-        student.showStatus();
-        this.students.push(student);
+        const selectedCourseIndex = parseInt(answers.courseIndex) - 1;
+        const selectedCourse = this.courses[selectedCourseIndex];
+        if (selectedCourse) {
+            const student = new Student(answers.name);
+            student.enroll(selectedCourse);
+            student.showStatus();
+            this.students.push(student);
+        }
+        else {
+            console.log('Error: Selected course not found.');
+        }
     }
     viewListOfStudents() {
         console.log('List of Enrolled Students:');
@@ -139,7 +156,7 @@ class StudentManagementSystem {
         ]);
         const selectedStudent = this.students[studentIndex - 1];
         const removedCourse = selectedStudent.getCoursesEnrolled().splice(courseIndex - 1, 1);
-        console.log(`${selectedStudent.getName} removed course: ${removedCourse[0].getCourseInfo()}`);
+        console.log(`${selectedStudent.getName()} removed course: ${removedCourse[0].getCourseInfo()}`);
         selectedStudent.showStatus();
     }
 }
